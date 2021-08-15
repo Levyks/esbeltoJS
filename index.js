@@ -85,9 +85,6 @@ function parseSpecialBlock(expression, htmlToParse, htmlParsed, filepath, evFunc
 
   const codeBlockMatch = findCodeBlock(htmlToParse, operator);
 
-  console.log(codeBlockMatch);
-  console.log("------------\n");
-
   if(codeBlockMatch.endIndex === -1) throw new Error(`Expected '${blockEnd}'`);
 
   const blockHtml = codeBlockMatch.html.trimStart();
@@ -180,8 +177,6 @@ function findCodeBlock(html, operator) {
     
     const nextOpenBraceIdx = html.indexOf(`{#${operator}`, currentIdx);
     closeBraceIdx = html.indexOf(`{/${operator}}`, currentIdx);
-
-    console.log(nextOpenBraceIdx, closeBraceIdx);
 
     if(nextOpenBraceIdx === -1 || nextOpenBraceIdx > closeBraceIdx) {
       return {
