@@ -1,9 +1,9 @@
 {
   "name": "esbelto",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "View engine for Express with a svelte-like syntax",
   "main": "index.js",
-  "author": "Your Name <marcio.levy20@gmail.com> (https://github.com/Levyks)",
+  "author": "Levy Barbosa <marcio.levy20@gmail.com> (https://github.com/Levyks)",
   "license": "GNU",
   "repository": {
     "type": "git",
