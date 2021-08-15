@@ -7,7 +7,7 @@ class EsbeltoError extends Error {
   constructor(message, stack) {
     super();
 
-    this.message = `'${message}'\n`;
+    this.message = `${message}\n`;
     this.message += ` in expression '{${stack.expression}}'\n`;
     this.message += ` at '${stack.filepath}'`;
 
@@ -99,13 +99,13 @@ function parseHtml(html, filepath, evFunc = null) {
 function parseSpecialBlock(expression, htmlToParse, htmlParsed, filepath, evFunc = null) {
   const operator = expression.split(' ')[0].slice(1);
 
-  if(!['if', 'each'].includes(operator)) throw new Error(`Invalid operator '${operator}'`);
+  if(!['if', 'each'].includes(operator)) throw new EsbeltoError(`Invalid operator '${operator}'`,{expression, filepath});
 
   const blockEnd = `{/${operator}}`;
 
   const codeBlockMatch = findCodeBlock(htmlToParse, operator);
 
-  if(codeBlockMatch.endIndex === -1) throw new Error(`Expected '${blockEnd}'`);
+  if(codeBlockMatch.endIndex === -1) throw new EsbeltoError(`Expected '${blockEnd}'`, {expression, filepath});
 
   const blockHtml = codeBlockMatch.html.trimStart();
 
