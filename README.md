@@ -12,7 +12,9 @@ const esbelto = require('esbelto');
 
 const app = express();
 
-//You can use 'svelte', 'esb', or any other extension, just make sure to configure your editor to treat it as a .svelte file
+/*You can use 'svelte', 'esb', or any other extension
+ *just make sure to configure your editor to treat it as a .svelte file
+ */
 app.engine('svelte', esbelto);
 app.set('view engine', 'svelte');
 ```
