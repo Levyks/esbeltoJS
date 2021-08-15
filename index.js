@@ -23,7 +23,7 @@ function include(relpath, options) {
 
 function parseFile(filepath, options) {
   function getVariables() {
-    return options;
+    return options || {};
   }
 
   const fileString = fs.readFileSync(filepath, 'utf-8');
