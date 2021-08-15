@@ -1,6 +1,6 @@
 # esbeltoJS [ALPHA]
 
-An simple view engine for Express with a Svelte-like syntax
+A simple view engine for Express with a Svelte-like syntax
 
 ## How to use
 ```
