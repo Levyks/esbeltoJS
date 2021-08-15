@@ -96,7 +96,11 @@ user-dashboard.svelte:
 
 </body>
 ```
-{#each array as elem, idx} syntax coming soon
+You can also use 
+```svelte
+{#each array as elem, idx}
+```
+To get the index of the current iteration
 
 partials/head.svelte:
 ```svelte
