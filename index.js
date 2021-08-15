@@ -3,6 +3,18 @@ const fs = require('fs');
 let dirpath;
 let evaluateExpr = {};
 
+class EsbeltoError extends Error {
+  constructor(message, stack) {
+    super();
+
+    this.message = `'${message}'\n`;
+    this.message += ` in expression '{${stack.expression}}'\n`;
+    this.message += ` at '${stack.filepath}'`;
+
+    this.name = "EsbeltoError";
+  }
+}
+
 function render(filepath, options, callback) {
   let indexOfLastBar = filepath.lastIndexOf('/');
   if(indexOfLastBar === -1) indexOfLastBar = filepath.lastIndexOf('\\');
@@ -19,6 +31,14 @@ function getInclude() {
 
 function include(relpath, options) {
   return parseFile(dirpath + relpath, options);
+}
+
+function tryEval(evalFunc, expression, customStack) {
+  try {
+    return evalFunc(expression);
+  } catch (e) {
+    throw new EsbeltoError(e.message, customStack);
+  }
 }
 
 function parseFile(filepath, options) {
@@ -67,7 +87,7 @@ function parseHtml(html, filepath, evFunc = null) {
     ) {
       [ htmlToParse, htmlParsed ] = parseSpecialBlock(expression, htmlToParse, htmlParsed, filepath, evFunc);
     } else {
-      htmlParsed += (evFunc || evaluateExpr[filepath])(expression);
+      htmlParsed += tryEval((evFunc || evaluateExpr[filepath]), expression, {expression, filepath});
     }
   }
 
@@ -118,7 +138,7 @@ function parseIfBlock(expression, html, filepath, evFunc = null) {
   }
 
   const condition = expression.slice(4);
-  return parseHtml((evFunc || evaluateExpr[filepath])(condition) ? ifHtml : elseHtml, filepath);
+  return parseHtml(tryEval((evFunc || evaluateExpr[filepath]), condition, {expression, filepath}) ? ifHtml : elseHtml, filepath);
 }
 
 function parseEachBlock(expression, html, filepath, evFunc = null) {
@@ -127,14 +147,16 @@ function parseEachBlock(expression, html, filepath, evFunc = null) {
 
   let generatedHtml = '';
 
-  const evalFuncs = (evFunc || evaluateExpr[filepath])(`eachEvalFuncs=[];${iterator[0]}.forEach((${iterator[1]}) => {
+  const evalFuncs = tryEval((evFunc || evaluateExpr[filepath]), `eachEvalFuncs=[];${iterator[0]}.forEach((${iterator[1]}) => {
     function evExpr(expr){return eval(expr);}
     eachEvalFuncs.push(evExpr);
-  }); eachEvalFuncs`);
+  }); eachEvalFuncs`, {expression, filepath});
 
-  evalFuncs.forEach(evalFunc => {
-    generatedHtml += parseHtml(html, filepath, evalFunc);    
-  });
+  if(evalFuncs) {
+    evalFuncs.forEach(evalFunc => {
+      generatedHtml += parseHtml(html, filepath, evalFunc);    
+    });
+  }
 
   return generatedHtml;
 }
