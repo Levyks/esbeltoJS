@@ -163,12 +163,15 @@ function parseEachBlock(expression, html, filepath, evFunc = null) {
 
 function findCurlyBracesMatch(html) {
   let currentIdx = 0;
+  let openBracesCount = 0;
+  let closeBracesCount = 0;
 
   const openBraceIdx = html.indexOf('{', currentIdx);
 
   if(openBraceIdx === -1) return false;
 
   currentIdx = openBraceIdx + 1;
+  openBracesCount += 1;
 
   let closeBraceIdx;
 
@@ -177,15 +180,30 @@ function findCurlyBracesMatch(html) {
     const nextOpenBraceIdx = html.indexOf('{', currentIdx);
     closeBraceIdx = html.indexOf('}', currentIdx);
 
-    if(nextOpenBraceIdx === -1 || nextOpenBraceIdx > closeBraceIdx) {
+    if(nextOpenBraceIdx === -1) {
+      currentIdx = closeBraceIdx + 1;
+      
+      if(closeBraceIdx !== -1) {
+        closeBracesCount += 1;
+      }
+
+    } else {
+      currentIdx = Math.min(nextOpenBraceIdx, closeBraceIdx)+1;
+
+      if(nextOpenBraceIdx < closeBraceIdx) {
+        openBracesCount += 1;
+      } else {
+        closeBracesCount += 1;
+      }
+    }
+
+    if(openBracesCount === closeBracesCount) {
       return {
         startIndex: openBraceIdx,
         endIndex: closeBraceIdx,
         expression: html.substring(openBraceIdx + 1, closeBraceIdx)
-      }
+      }  
     }
-
-    currentIdx = closeBraceIdx+1;
   }
 }
 
