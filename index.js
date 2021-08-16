@@ -43,7 +43,7 @@ function includeScript(script) {
   Object.keys(script).forEach(key => {
     scriptString += `${key}="${script[key]}" `;
   });
-  scriptString += `</script>`;
+  scriptString += `></script>`;
   return scriptString;
 }
 
