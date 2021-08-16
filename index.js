@@ -38,10 +38,10 @@ function getIncludeScript() {
 }
 
 function includeScript(script) {
-  if(typeof script === 'string') return `<script src=${script}></script>`;
+  if(typeof script === 'string') return `<script src="${script}"></script>`;
   let scriptString = '<script ';
   Object.keys(script).forEach(key => {
-    scriptString += `${key}=${script[key]} `;
+    scriptString += `${key}="${script[key]}" `;
   });
   scriptString += `</script>`;
   return scriptString;
