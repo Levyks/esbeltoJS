@@ -33,6 +33,20 @@ function include(relpath, options) {
   return parseFile(dirpath + relpath, options);
 }
 
+function getIncludeScript() {
+  return includeScript;
+}
+
+function includeScript(script) {
+  if(typeof script === 'string') return `<script src=${script}></script>`;
+  let scriptString = '<script ';
+  Object.keys(script).forEach(key => {
+    scriptString += `${key}=${script[key]} `;
+  });
+  scriptString += `</script>`;
+  return scriptString;
+}
+
 function tryEval(evalFunc, expression, customStack) {
   try {
     return evalFunc(expression);
