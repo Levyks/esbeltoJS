@@ -1,4 +1,4 @@
-# esbeltoJS [ALPHA]
+# esbeltoJS [BETA]
 
 A simple view engine for Express with a Svelte-like syntax
 
@@ -15,7 +15,7 @@ const app = express();
 /*You can use 'svelte', 'esb', or any other extension
  *just make sure to configure your editor to treat it as a .svelte file
  */
-app.engine('svelte', esbelto);
+app.engine('svelte', esbelto.express);
 app.set('view engine', 'svelte');
 ```
 
@@ -28,7 +28,7 @@ app.get('/', function (req, res) {
 ```
 index.svelte:
 ```svelte
-<script>
+<script id="esbelto">
   let { user } = getVariables();
 </script>
 
@@ -69,7 +69,7 @@ app.get('/user', function (req, res) {
 ```
 user-dashboard.svelte: 
 ```svelte
-<script>
+<script id="esbelto">
   let include = getInclude();
   let { user } = getVariables();
 </script>
@@ -104,7 +104,7 @@ To get the index of the current iteration
 
 partials/head.svelte:
 ```svelte
-<script>
+<script id="esbelto">
   let { title } = getVariables();
 </script>
 
@@ -114,3 +114,41 @@ partials/head.svelte:
 
 ![User Dashboard](https://i.imgur.com/Q051fQt.png)
 
+### includeScript
+
+Most editors for .svelte files will warn you if you have more than one <script> tag in your code.
+This isn't a problem for Esbelto, but, if you want to avoid that warning, you can use the includeScript method
+
+head.svelte
+```svelte
+<script id="esbelto">
+  let includeScript = getIncludeScript();
+  let { title, scripts } = getVariables();
+</script>
+
+<title>{title}</title>
+
+{includeScript({
+  src: "https://code.jquery.com/jquery-3.6.0.min.js",
+  integrity: "sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=",
+  crossorigin: "anonymous"
+})}
+
+{#if scripts}
+  {#each scripts as script}
+    {includeScript(script)}
+  {/each}
+{/if}
+```
+included with:
+```svelte
+<script id="esbelto">
+  let include = getInclude();
+  let { title, description, locale, grids } = getVariables();
+</script>
+<head> 
+  {include('./head.svelte', {title: "pé de goiaba", scripts: ['/js/user/login.js']})}
+</head>
+<!-- ... -->
+```
+You can use either an string with the script's src or an object with each desired property of the <script> tag
