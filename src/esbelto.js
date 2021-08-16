@@ -16,5 +16,6 @@ function express(filepath, options, callback) {
 
 module.exports = {
   express,
-  config
+  config,
+  Renderer
 }
