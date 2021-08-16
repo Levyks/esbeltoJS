@@ -210,6 +210,8 @@ function findCurlyBracesMatch(html) {
 function findCodeBlock(html, operator) {
 
   let currentIdx = 0;
+  let openTagsCount = 1;
+  let closeTagsCount = 0;
 
   let closeBraceIdx;
 
@@ -218,14 +220,29 @@ function findCodeBlock(html, operator) {
     const nextOpenBraceIdx = html.indexOf(`{#${operator}`, currentIdx);
     closeBraceIdx = html.indexOf(`{/${operator}}`, currentIdx);
 
-    if(nextOpenBraceIdx === -1 || nextOpenBraceIdx > closeBraceIdx) {
+    if(nextOpenBraceIdx === -1) {
+      currentIdx = closeBraceIdx + 1;
+      
+      if(closeBraceIdx !== -1) {
+        closeTagsCount += 1;
+      }
+
+    } else {
+      currentIdx = Math.min(nextOpenBraceIdx, closeBraceIdx)+1;
+
+      if(nextOpenBraceIdx < closeBraceIdx) {
+        openTagsCount += 1;
+      } else {
+        closeTagsCount += 1;
+      }
+    }
+
+    if(openTagsCount === closeTagsCount) {
       return {
         endIndex: closeBraceIdx,
         html: html.substring(0, closeBraceIdx)
       }
     }
-
-    currentIdx = closeBraceIdx+1;
   }
 }
 
