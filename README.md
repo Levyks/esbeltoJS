@@ -144,10 +144,10 @@ included with:
 ```svelte
 <script id="esbelto">
   let include = getInclude();
-  let { title, description, locale, grids } = getVariables();
+  let { title, description } = getVariables();
 </script>
 <head> 
-  {include('./head.svelte', {title: "pé de goiaba", scripts: ['/js/user/login.js']})}
+  {include('./head.svelte', {title: "Home Page", scripts: ['/js/user/login.js']})}
 </head>
 <!-- ... -->
 ```
