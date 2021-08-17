@@ -11,10 +11,11 @@ class Renderer {
     if(indexOfLastBar === -1) indexOfLastBar = filepath.lastIndexOf('\\');
 
     this.dirpath = filepath.substring(0, indexOfLastBar + 1 );
-    this.fileContents = fs.readFileSync(filepath, 'utf-8');
+    this.originalFileContents = fs.readFileSync(filepath, 'utf-8');
   }
 
   render() {
+    this.fileContents = this.originalFileContents;
     const scriptBlock = this.extractScriptBlock();
     if(!scriptBlock) return this.fileContents;
 
