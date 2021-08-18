@@ -7,7 +7,7 @@ class EsbeltoError extends Error {
       this.message += ` in expression '${stack.expression}'\n`;
     }
     if(stack.after) {
-      this.message += ` after '${stack.after}'\n`;
+      this.message += ` after '${stack.after} ...'\n`;
     }
     this.message += ` at '${stack.filepath}'`;
 

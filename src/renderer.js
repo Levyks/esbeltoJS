@@ -1,44 +1,47 @@
-const fs = require('fs');
-const evaluator = require('./evaluator');
-const parser = require('./parser');
+const Compiler = require('./compiler');
 
 class Renderer {
-  constructor(filepath, options) {
+  static compiledFuncs = {};
+
+  constructor(filepath, options, cacheCompileds) {
     this.options = options || {};
     this.filepath = filepath;
+    this.cacheCompileds = cacheCompileds;
 
     let indexOfLastBar = filepath.lastIndexOf('/');
     if(indexOfLastBar === -1) indexOfLastBar = filepath.lastIndexOf('\\');
 
     this.dirpath = filepath.substring(0, indexOfLastBar + 1 );
-    this.originalFileContents = fs.readFileSync(filepath, 'utf-8');
+
+    if(!cacheCompileds || !Renderer.compiledFuncs[filepath]){
+      this.compiler = new Compiler(filepath, this);
+    } 
   }
 
   render() {
-    this.fileContents = this.originalFileContents;
-    const scriptBlock = this.extractScriptBlock();
-    if(!scriptBlock) return this.fileContents;
+    let compiledFunc = Renderer.compiledFuncs[this.filepath] || this.compiler.getCompiledFunc();
 
-    this.mainEval = evaluator.evaluateScriptBlock(scriptBlock, this);
+    if(this.cacheCompileds) Renderer.compiledFuncs[this.filepath] = compiledFunc;
 
-    return parser.parseHtml(this.fileContents, this.filepath, this.mainEval);
+    return compiledFunc(this.options);
   }
 
-
-  extractScriptBlock() {
-    const scriptMatch = this.fileContents.match(/<script[ ]{1,}id=['"]esbelto['"][ ]{0,}>([\s\S]*?)<\/script>/);
-
-    if(!scriptMatch) return false;
-
-    this.fileContents = this.fileContents.substring(0, scriptMatch.index) + this.fileContents.substring(scriptMatch[0].length+scriptMatch.index);
-    this.fileContents = this.fileContents.trim();
-
-    return scriptMatch[1];
+  escapeHTML(str) {
+    str = str.toString();
+    return str.replace(/[&<>'"]/g, 
+      tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[tag] || tag)
+    );
   }
 
   include(relpath, options) {
-    const renderer = new Renderer(this.dirpath + relpath, options)
-    return renderer.render();;
+    const renderer = new Renderer(this.dirpath + relpath, options, this.cacheCompileds);
+    return renderer.render();
   }
 
   includeScript(script) {
@@ -50,16 +53,6 @@ class Renderer {
     scriptString += `></script>`;
     return scriptString;
   }
-
-  escape(string) {
-    return string 
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
 }
 
 module.exports = Renderer;
