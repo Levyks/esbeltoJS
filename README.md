@@ -40,6 +40,7 @@ index.svelte:
 </body>
 ```
 ![Welcome John](https://i.imgur.com/vVogPzE.png)
+
 ---
 
 ### {#if}, {:else} and {:else if}
@@ -64,6 +65,7 @@ if.svelte:
 {/if}
 ```
 ![If example](https://i.imgur.com/TImXMt4.png)
+
 ---
 
 ### {#each}
@@ -91,6 +93,7 @@ each.svelte:
 {/each}
 ```
 ![Each example](https://i.imgur.com/R5K65Nq.png)
+
 ---
 
 ### Escaping {@html}
@@ -108,6 +111,7 @@ escaping.svelte:
 <p>{@html title}</p>
 ```
 ![Escaping example](https://i.imgur.com/LXDch0V.png)
+
 ---
 ### include and includeScript
 
@@ -152,6 +156,7 @@ head.svelte:
 {/if}
 ```
 ![Include example](https://user-images.githubusercontent.com/16294244/130052111-6a13be9d-cfe3-4156-a8ca-a10c76336164.png)
+
 ---
 ### config
 You can tweak some settings by using the `esbelto.config()` method, although it's not required
