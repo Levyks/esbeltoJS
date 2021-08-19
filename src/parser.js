@@ -81,54 +81,57 @@ function parseSpecialBlock(originalMatch, htmlToParse, filepath) {
   }
 }
 
-function parseIfBlock(originalMatch, blockContent) {
+//To optimize
+function parseIfBlock(originalMatch, blockContent, filepath) {
+
+  blockContent = blockContent.trim();
+
   const blocks = [];
+
+  let previousMatch = originalMatch;
+  previousMatch.endIndex = 0;
   let currentIdx = 0;
+  const substrSize = 6;
 
-  let elseIdx = -originalMatch.length;
-  let elseMatch = originalMatch;
+  let nestedIfs = 0;
 
-  while(true) {
-    const indexOfNextIf = blockContent.indexOf('{#if', currentIdx);
+  while(currentIdx<blockContent.length-substrSize) {
+    const substring = blockContent.substring(currentIdx, currentIdx+substrSize);
+    
+    if(substring.startsWith('{#if')) nestedIfs += 1;
+    else if(substring.startsWith('{/if}')) nestedIfs -= 1;
 
-    if(indexOfNextIf !== -1) {
-      currentIdx = blockContent.indexOf('{/if}', currentIdx);
-      if(currentIdx === -1) throw new EsbeltoError('Expected {/if}', {filepath, expression: blockContent.substring(indexOfNextIf, 10)});
+    const isLastIteration = currentIdx === blockContent.length-substrSize-1;
+
+    if((nestedIfs === 0 && substring.startsWith('{:else')) || isLastIteration ) {
+
+      let type, condition;
+      if(previousMatch.expression.startsWith('#if')) {
+        type = 'if';
+        condition = previousMatch.expression.slice(4);
+      } else if(previousMatch.expression.startsWith(':else if')) {
+        type = 'else if';
+        condition = previousMatch.expression.slice(9);
+      } else {
+        type = 'else';
+        condition = false;
+      }
+
+      blocks.push({
+        type: type,
+        condition: condition,
+        content: isLastIteration ?
+          blockContent.slice(previousMatch.endIndex) :
+          blockContent.substring(previousMatch.endIndex, currentIdx)
+      });
+
+      previousMatch = findMatch(blockContent, filepath, currentIdx);
     }
 
-    const nextElseIdx = blockContent.indexOf('{:else', currentIdx);
-    
-    let type, condition;
-    if(elseMatch.expression.startsWith('#if')) {
-      type = 'if';
-      condition = elseMatch.expression.slice(4);
-    } else if(elseMatch.expression.startsWith(':else if')) {
-      type = 'else if';
-      condition = elseMatch.expression.slice(9);
-    } else {
-      type = 'else';
-      condition = false;
-    }
-
-    blocks.push({
-      type: type,
-      condition: condition,
-      content: nextElseIdx === -1 ? 
-        blockContent.slice(elseIdx + elseMatch.length) : 
-        blockContent.substring(elseIdx + elseMatch.length, nextElseIdx)
-    });
-
-    
-    if(nextElseIdx === -1) break;
-
-    elseIdx = nextElseIdx;
-    elseMatch = findMatch(blockContent.slice(elseIdx));  
-    currentIdx = elseMatch.endIndex + elseIdx;
-
-  }
+    currentIdx+=1;
+  } 
 
   return blocks;
-
 }
 
 module.exports = {

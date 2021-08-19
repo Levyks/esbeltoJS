@@ -38,11 +38,11 @@ class Compiler {
     }
   }
 
-  compileSection(sectionHml) {
+  compileSection(sectionHtml) {
     let compiledSection = '__esbCompiled += ""';
 
     parser.findAllMatches(
-      sectionHml, 
+      sectionHtml, 
       this.filepath, 
       (match, parsedHtml) => {
         compiledSection += '+`' + parsedHtml.replace(/"/g, '\"') + '`';
@@ -75,7 +75,7 @@ class Compiler {
 
   compileIf(match, blockContent) {
     let compiled = "";
-    const blocks = parser.parseIfBlock(match, blockContent);
+    const blocks = parser.parseIfBlock(match, blockContent, this.filepath);
     blocks.forEach(block => {
       compiled += block.type;
       if(block.condition) compiled += '(' + block.condition + ')';
