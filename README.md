@@ -1,4 +1,4 @@
-# esbeltoJS [BETA]
+# esbeltoJS
 
 A simple view engine for Express with a Svelte-like syntax
 
@@ -20,9 +20,8 @@ app.set('view engine', 'svelte');
 ```
 
 ### Passing values
-
 ```js
-app.get('/', function (req, res) {
+app.get('/', (req, res) => {
   res.render('index', { user: { name: "John" } });
 });
 ```
@@ -41,85 +40,95 @@ index.svelte:
 </body>
 ```
 ![Welcome John](https://i.imgur.com/vVogPzE.png)
+---
 
-### {#if}, {#each} and include()
+### {#if}, {:else} and {:else if}
 ```js
-app.get('/user', function (req, res) {
-  res.render('user-dashboard', { 
+app.get('/if', (req, res) => {
+  res.render('if', { 
     user: {
-      name: "John Doe",
-      age: 42,
-      gender: 'M',
-      isAdmin: true,
-      children: [
-        {
-          name: "John Doe Jr",
-          gender: 'M',
-          age: 11
-        },
-        {
-          name: "Jane Doe",
-          gender: 'F',
-          age: 19
-        }
-      ]
+      isOwner: false,
+      isAdmin: true
     }
   });
 });
 ```
-user-dashboard.svelte: 
+if.svelte: 
+```svelte
+{#if user.isOwner}
+  <button>Owner dashboard</button>
+{:else if user.isAdmin}
+  <button>Admin dashboard</button>
+{:else}
+  <button>User dashboard</button>
+{/if}
+```
+![If example](https://i.imgur.com/TImXMt4.png)
+---
+
+### {#each}
+```js
+app.get('/each', (req, res) => {
+  res.render('each', {
+    books: [
+      "The Hitchhiker's Guide to the Galaxy",
+      "The Restaurant at the End of the Universe",
+      "Life, the Universe and Everything",
+      "So Long, and Thanks for All the Fish",
+      "Mostly Harmless"
+    ]
+  });
+});
+```
+each.svelte:
+```svelte
+{#each books as book}
+  <h2>{book}</h2>
+{/each}
+<br>
+{#each books as book, idx}
+  <h2>{idx+1}° -> {book}</h2>
+{/each}
+```
+![Each example](https://i.imgur.com/R5K65Nq.png)
+---
+
+### Escaping {@html}
+Just as in Svelte, Esbelto also escapes HTML by default, if you do not want to escape it, just add a `@html` after the `{`
+```js
+app.get('/escaping', function (req, res) {
+  res.render('escaping', {
+    title: '<b>This is the title</b>'
+  });
+});
+```
+escaping.svelte:
+```svelte
+<p>{title}</p>
+<p>{@html title}</p>
+```
+![Escaping example](https://i.imgur.com/LXDch0V.png)
+---
+### include and includeScript
+
+Most editors for .svelte files (like Svelte's extension for VSCode) will warn you if you have more than one `<script>` tag in your code.
+This isn't a problem for Esbelto, but, if you want to avoid that warning, you can use the includeScript method(You can use either an string with the script's src or an object with each desired property of the `<script>` tag)
+
+include.svelte:
 ```svelte
 <script id="esbelto">
   let include = getInclude();
-  let { user } = getVariables();
 </script>
 
 <head>
-  {include('./partials/head.svelte', {title: "User Dashboard"})}
+  {include('./head.svelte', {title: "Testing include", scripts: ['js/main.js']})}
 </head>
 
 <body>
-  <h1>{user.name}</h1>
-  <h3>Age: {user.age}</h3>
-
-  <h4>Children:</h4>
-  
-  <ul>
-  {#each user.children as child}
-    <li class="{child.gender == 'M' ? 'blue' : 'pink'}">{child.name} - {child.age}</li>
-  {/each}
-  </ul>
-
-  {#if user.isAdmin}
-    <button>Go to admin panel</button>
-  {/if}
-
-</body>
+  <span class='text-success ms-1'>Hello World!</span>
+</body>  
 ```
-You can also use 
-```svelte
-{#each array as elem, idx}
-```
-To get the index of the current iteration
-
-partials/head.svelte:
-```svelte
-<script id="esbelto">
-  let { title } = getVariables();
-</script>
-
-<title>{title}</title>
-<link rel="stylesheet" href="/css/style.css">
-```
-
-![User Dashboard](https://i.imgur.com/Q051fQt.png)
-
-### includeScript
-
-Most editors for .svelte files will warn you if you have more than one <script> tag in your code.
-This isn't a problem for Esbelto, but, if you want to avoid that warning, you can use the includeScript method
-
-head.svelte
+head.svelte:
 ```svelte
 <script id="esbelto">
   let includeScript = getIncludeScript();
@@ -127,6 +136,8 @@ head.svelte
 </script>
 
 <title>{title}</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
 
 {includeScript({
   src: "https://code.jquery.com/jquery-3.6.0.min.js",
@@ -140,15 +151,24 @@ head.svelte
   {/each}
 {/if}
 ```
-included with:
-```svelte
-<script id="esbelto">
-  let include = getInclude();
-  let { title, description } = getVariables();
-</script>
-<head> 
-  {include('./head.svelte', {title: "Home Page", scripts: ['/js/user/login.js']})}
-</head>
-<!-- ... -->
+![Include example](https://user-images.githubusercontent.com/16294244/130052111-6a13be9d-cfe3-4156-a8ca-a10c76336164.png)
+---
+### config
+You can tweak some settings by using the `esbelto.config()` method, although it's not required
+```js
+const esbelto = require('./esbelto');
+const express = require('express');
+
+const app = express();
+
+//Defaults
+esbelto.config({
+  htmlStartTag: '<!DOCTYPE html>\n<html>\n',
+  htmlEndTag: '\n</html>',
+  cacheCompiled: true
+});
+
+app.engine('svelte', esbelto.express);
+app.set('view engine', 'svelte');
 ```
-You can use either an string with the script's src or an object with each desired property of the <script> tag
+`cacheCompiled` will make every render after the 1st faster, but it can also be quite annoying during development, as nodemon won't restart by default after a change on a .svelte file
