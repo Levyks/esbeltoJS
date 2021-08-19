@@ -45,7 +45,9 @@ class Compiler {
       sectionHtml, 
       this.filepath, 
       (match, parsedHtml) => {
-        compiledSection += '+`' + parsedHtml.replace(/"/g, '\"') + '`';
+        parsedHtml = parsedHtml.replace(/"/g, '\\"')
+        if(!match) parsedHtml = parsedHtml.trimEnd();
+        compiledSection += '+`' + parsedHtml + '`';
     
         if(match) {
           if(match.expression.startsWith('@html')) {
@@ -59,7 +61,9 @@ class Compiler {
         else compiledSection += ';';
       },
       (match, parsedHtml, blockContent) => {
-        compiledSection += '+`' + parsedHtml.replace(/"/g, '\"') + '`;';
+        parsedHtml = parsedHtml.replace(/"/g, '\\"').trimEnd();
+        compiledSection += '+`' + parsedHtml + '`;';
+
         if(match.expression.startsWith('#if')) {
           compiledSection += this.compileIf(match, blockContent);
         } else if(match.expression.startsWith('#each')) {
