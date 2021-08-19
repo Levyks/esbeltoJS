@@ -7,7 +7,7 @@ let cacheCompileds = true;
 function config(options) {
   htmlStartTag = options.htmlStartTag || htmlStartTag;
   htmlEndTag = options.htmlEndTag || htmlEndTag;
-  cacheCompileds = options.cacheCompileds || cacheCompileds;
+  cacheCompileds = options.cacheCompileds !== undefined ? options.cacheCompileds : cacheCompileds;
 }
  
 function express(filepath, options, callback) {
