@@ -171,4 +171,39 @@ esbelto.config({
 app.engine('svelte', esbelto.express);
 app.set('view engine', 'svelte');
 ```
-`cacheCompiled` will make every render after the 1st faster, but it can also be quite annoying during development, as nodemon won't restart by default after a change on a .svelte file
+`cacheCompiled` makes every render after the 1st faster, but it can also be quite annoying during development, as nodemon won't restart by default after a change on a .svelte file, so you can just set it to `false` during development to avoid it
+
+---
+### Benchmark
+
+this is not by any means official, just a quick test I made forking [baryshev's benchmark](https://github.com/baryshev/template-benchmark) and adding esbelto to it, full results available at [Levyks/template-benchmark](https://github.com/Levyks/template-benchmark)
+```
+Rendering 100000 templates:
+
+esbeltoJS
+ Escaped   : 1334ms
+ Unescaped : 39ms
+ Total     : 1373ms
+
+EJS
+ Escaped   : 3090ms
+ Unescaped : 1443ms
+ Total     : 4533ms
+
+EJS without `with`
+ Escaped   : 1288ms
+ Unescaped : 50ms
+ Total     : 1338ms
+
+Pug
+ Escaped   : 4063ms
+ Unescaped : 47ms
+ Total     : 4110ms
+
+Pug without `with`
+ Escaped   : 3594ms
+ Unescaped : 27ms
+ Total     : 3621ms
+ ...
+```
+
