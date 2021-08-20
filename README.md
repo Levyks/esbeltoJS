@@ -181,7 +181,7 @@ app.set('view engine', 'svelte');
 ---
 ### Benchmark
 
-this is not by any means official, just a quick test I made forking [baryshev's benchmark](https://github.com/baryshev/template-benchmark) and adding esbelto to it, full results available at [Levyks/template-benchmark](https://github.com/Levyks/template-benchmark)
+This is not by any means official, just a quick test I made forking [baryshev's benchmark](https://github.com/baryshev/template-benchmark) and adding esbelto to it, full results available at [Levyks/template-benchmark](https://github.com/Levyks/template-benchmark)
 ```
 Rendering 100000 templates:
 
