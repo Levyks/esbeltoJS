@@ -81,7 +81,13 @@ function parseSpecialBlock(originalMatch, htmlToParse, filepath) {
   }
 }
 
-//To optimize
+function startsWithByIndex(needle, haystack, index) {
+  for(let i = 0; i < needle.length; i++) {
+    if(haystack[index + i] !== needle[i]) return false; 
+  }  
+  return true;
+}
+
 function parseIfBlock(originalMatch, blockContent, filepath) {
 
   blockContent = blockContent.trim();
@@ -91,19 +97,17 @@ function parseIfBlock(originalMatch, blockContent, filepath) {
   let previousMatch = originalMatch;
   previousMatch.endIndex = 0;
   let currentIdx = 0;
-  const substrSize = 6;
 
   let nestedIfs = 0;
 
-  while(currentIdx<blockContent.length-substrSize) {
-    const substring = blockContent.substring(currentIdx, currentIdx+substrSize);
+  while(currentIdx<blockContent.length) {
     
-    if(substring.startsWith('{#if')) nestedIfs += 1;
-    else if(substring.startsWith('{/if}')) nestedIfs -= 1;
+    if(startsWithByIndex('{#if', blockContent, currentIdx)) nestedIfs += 1;
+    else if(startsWithByIndex('{/if}', blockContent, currentIdx)) nestedIfs -= 1;
 
-    const isLastIteration = currentIdx === blockContent.length-substrSize-1;
+    const isLastIteration = currentIdx === blockContent.length-1;
 
-    if((nestedIfs === 0 && substring.startsWith('{:else')) || isLastIteration ) {
+    if((nestedIfs === 0 && startsWithByIndex('{:else', blockContent, currentIdx)) || isLastIteration ) {
 
       let type, condition;
       if(previousMatch.expression.startsWith('#if')) {
