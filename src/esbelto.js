@@ -1,18 +1,26 @@
 const Renderer = require('./renderer')
 
-let htmlStartTag = '<!DOCTYPE html>\n<html>\n';
-let htmlEndTag = '\n</html>';
-let cacheCompileds = true;
+let settings = {
+  htmlStartTag: '<!DOCTYPE html>\n<html>\n',
+  htmlEndTag: '\n</html>',
+  cacheCompileds: true,
+  cacheSettings: {
+    storeOnDisk: false,
+    recompileOnChange: true
+  }
+}
 
-function config(options) {
-  htmlStartTag = options.htmlStartTag || htmlStartTag;
-  htmlEndTag = options.htmlEndTag || htmlEndTag;
-  cacheCompileds = options.cacheCompileds !== undefined ? options.cacheCompileds : cacheCompileds;
+function config(newSettings) {
+  settings = Object.assign(
+    settings, 
+    newSettings, 
+    {cacheSettings: Object.assign(settings.cacheSettings, newSettings.cacheSettings)}
+  );
 }
  
-function express(filepath, options, callback) {
-  const renderer = new Renderer(filepath, options, cacheCompileds);
-  const rendered = htmlStartTag + renderer.render() + htmlEndTag;
+function express(filepath, data, callback) {
+  const renderer = new Renderer(filepath, data, settings);
+  const rendered = settings.htmlStartTag + renderer.render() + settings.htmlEndTag;
   return callback(null, rendered);
 }
 

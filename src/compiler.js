@@ -27,15 +27,12 @@ class Compiler {
   getCompiledFunc(renderer = this.renderer) {
     if(!this.compiledStr) this.compile();
 
-    let compiledFunc = eval(this.compiledStr);
+    const func = Compiler.getFuncFromStr(this.compiledStr, renderer);
+  
+    func.compiledAt = Date.now();
+    func.originalFuncStr = this.compiledStr;
 
-    function getInclude() {return (relpath, options) => {return renderer.include(relpath, options)};}
-    function getIncludeScript() {return renderer.includeScript;}
-
-    return (data) => {
-      function getVariables() {return data;}   
-      return compiledFunc(renderer.escapeHTML, getVariables, getInclude, getIncludeScript); 
-    }
+    return func;
   }
 
   compileSection(sectionHtml) {
@@ -102,6 +99,18 @@ class Compiler {
     this.toCompile = this.toCompile.trim();
 
     return scriptMatch[1];
+  }
+
+  static getFuncFromStr(funcStr, renderer) {
+    const compiledFunc = eval(funcStr);
+
+    function getInclude() {return (relpath, options) => {return renderer.include(relpath, options)};}
+    function getIncludeScript() {return renderer.includeScript;}
+    
+    return (data) => {
+      function getVariables() {return data;}   
+      return compiledFunc(renderer.escapeHTML, getVariables, getInclude, getIncludeScript); 
+    };
   }
 
 }

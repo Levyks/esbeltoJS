@@ -166,20 +166,129 @@ const express = require('express');
 
 const app = express();
 
-//Defaults
+//These are the defaults
 esbelto.config({
   htmlStartTag: '<!DOCTYPE html>\n<html>\n',
   htmlEndTag: '\n</html>',
-  cacheCompiled: true
+  cacheCompileds: true,
+  cacheSettings: {
+    storeOnDisk: false,
+    recompileOnChange: true
 });
 
 app.engine('svelte', esbelto.express);
 app.set('view engine', 'svelte');
 ```
-`cacheCompiled` makes every render after the 1st faster, but it can also be quite annoying during development, as nodemon won't restart by default after a change on a .svelte file, so you can just set it to `false` during development to avoid it
+- `cacheCompiled` -> makes every render after the 1st faster, as it does not have to recompile the template every request
+- `storeOnDisk` -> setting this to true will make esbelto store the compiled template in a file in the same folder as the template, as opposed to in memory, in my tests, this option was actually slower than `cacheCompiled: false`, but it could be useful when working with some really big templates
+- `recompileOnChange` -> checks the last modified date of the template, and recompiles it if it was changed, really useful during development, but I recommend setting this to false in production, as it makes the render a bit slower, this option is always true when using `storeOnDisk: true`, and, therefore, ignored
+
+#### Cache settings performance comparisons
+This was the template used for these tests: 
+user-dashboard.svelte:
+```svelte
+<script id="esbelto">
+  let include = getInclude();
+  let { user } = getVariables();
+</script>
+
+<head>
+  {include('./partials/head.svelte', {title: "User Dashboard"})}
+</head>
+
+<body>
+  <h1>{user.name}</h1>
+  <h3>Age: {user.age}</h3>
+  <h4>Children:</h4>
+  <ul>
+  {#each user.children as child}
+    <li class="{child.gender == 'M' ? 'blue' : 'pink'}">{child.name} - {child.age}</li>
+  {/each}
+  </ul>
+  {#if user.isAdmin || user.isOwner}
+    <span>Some administrative data</span>
+    <br>
+    {#if user.isOwner}
+      <button>Go to owner panel</button>
+    {:else if user.isAdmin}
+      <button>Go to admin panel</button>
+    {/if}
+  {/if}
+</body>
+```
+/partials/head.svelte:
+```svelte
+<script id="esbelto">
+  let { title } = getVariables();
+</script>
+
+<title>{title}</title>
+<link rel="stylesheet" href="/css/style.css">
+```
+Data used:
+```json
+{ 
+  "user": {
+    "name": "John Doe",
+    "age": 42,
+    "gender": "M",
+    "isAdmin": true,
+    "children": [
+      {
+        "name": "John Doe Jr",
+        "gender": "M",
+        "age": 11
+      },
+      {
+        "name": "Jane Doe",
+        "gender": "F",
+        "age": 19
+      }
+    ]
+  }
+}
+```
+##### Results:
+```
+Settings:  { cacheCompileds: false }
+
+Rendering 1000 times:
+
+First render: 2.3007ms
+Average of all renders but the first: 0.2948488488488488ms
+Total time elapsed 296.8547ms
+
+--------------------------
+Settings:  { cacheCompileds: true } //Default
+
+Rendering 1000 times:
+
+First render: 3.2604ms
+Average of all renders but the first: 0.17305155155155155ms
+Total time elapsed 176.1389ms
+
+--------------------------
+Settings:  { cacheCompileds: true, cacheSettings: { recompileOnChange: false } }
+
+Rendering 1000 times:
+
+First render: 1.8947ms
+Average of all renders but the first: 0.008698698698698699ms
+Total time elapsed 10.5847ms
+
+--------------------------
+Settings:  { cacheCompileds: true, cacheSettings: { storeOnDisk: true } }
+
+Rendering 1000 times:
+
+First render: 1.7583ms
+Average of all renders but the first: 0.6899459459459459ms
+Total time elapsed 691.0143ms
+```
+Beware that the difference between caching and not caching will be greatly bigger with more complex templates
 
 ---
-### Benchmark
+### Benchmark with other view engines
 
 This is not by any means official, just a quick test I made forking [baryshev's benchmark](https://github.com/baryshev/template-benchmark) and adding esbelto to it, full results available at [Levyks/template-benchmark](https://github.com/Levyks/template-benchmark)
 ```
