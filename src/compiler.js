@@ -13,7 +13,11 @@ class Compiler {
     this.toCompile = this.fileContents;
 
     const scriptBlock = this.extractScriptBlock();
-    if(!scriptBlock) return this.toCompile;
+
+    if(!scriptBlock) {
+      this.compiledStr = '() => {return `' + this.toCompile + '`;}';
+      return this.compiledStr;
+    } 
 
     this.compiledStr = '(escapeHTML, getVariables, getInclude, getIncludeScript) => {' + scriptBlock + ';let __esbCompiled = "";';
 
