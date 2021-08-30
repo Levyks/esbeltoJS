@@ -72,7 +72,7 @@ class Renderer {
   }
 
   escapeHTML(str) {
-    str = str.toString();
+    str = str ? str.toString() : '';
     return str.replace(/[&<>'"]/g, 
       tag => ({
         '&': '&amp;',
