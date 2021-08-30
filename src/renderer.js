@@ -84,7 +84,7 @@ class Renderer {
     );
   }
 
-  include(relpath, data) {
+  include(relpath, data = {}) {
     const renderer = new Renderer(this.dirpath + relpath, Object.assign(data, {settings: this.data.settings}), this.settings);
     return renderer.render();
   }
