@@ -1,6 +1,6 @@
 {
   "name": "esbelto",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "View engine for Express with a svelte-like syntax",
   "main": "index.js",
   "author": "Levy Barbosa <marcio.levy20@gmail.com> (https://github.com/Levyks)",
@@ -9,6 +9,7 @@
     "type": "git",
     "url": "git+https://github.com/Levyks/esbeltoJS.git"
   },
+  "types": "types/index.d.ts",
   "keywords": [
     "express",
     "view-engine",
